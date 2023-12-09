@@ -56,7 +56,7 @@ if __name__ == "__main__":
         new_styles = styles.unsqueeze(1).repeat(1, 14, 1) + offset
         gen_im, _ = generator([new_styles], input_is_latent=True, randomize_noise=False, 
                         truncation=truncation, truncation_latent=mean_latent)
-
-        utils.save_image(input_im, save_path+"/input.png", nrow=args.gen_num, padding=10, normalize=True, range=(-1, 1), pad_value=1)
-        utils.save_image(gen_im, save_path+"/output.png", nrow=args.gen_num, padding=10, normalize=True, range=(-1, 1), pad_value=1)
+        # change the range parameters due to the deprecation of utils function of torchvision
+        utils.save_image(input_im, save_path+"/input.png", nrow=args.gen_num, padding=10, normalize=True, value_range=(-1, 1), pad_value=1)
+        utils.save_image(gen_im, save_path+"/output.png", nrow=args.gen_num, padding=10, normalize=True, value_range=(-1, 1), pad_value=1)
 
