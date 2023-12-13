@@ -1,4 +1,5 @@
-# ManiCLIP
+# ThaiManiCLIP
+- aimed to be under research on low-resource task
 
 ## Official PyTorch implementation
 

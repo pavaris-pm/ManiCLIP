@@ -657,6 +657,7 @@ class PartTextDataset(data.Dataset):
         else:
             sampled_text = 'the person has ' + concat_text
 
+        # text to be tokenized will be changed 
         clip_text = clip.tokenize(sampled_text)
         exist_mask = torch.zeros(40)
         exist_mask[selected_cate_40] = 1
@@ -699,6 +700,10 @@ class PositionalEncoding(nn.Module):
 
 
 class TransModel(nn.Module):
+    '''
+    This is the current architecture for ManiCLIP
+    we will redesign its architecture so that it can support most of low-resource language amap
+    '''
     def __init__(self, d_model: int = 512, nhead: int = 4, dim_feedforward: int = 2048, 
                 activation: str = "relu", dropout: float = 0.2,
                 num_decoder_layers: int = 4,):
@@ -713,6 +718,7 @@ class TransModel(nn.Module):
                     nn.Linear(512, 512),
                     nn.ReLU(),
         )
+        # FFN to map text into required form
         self.text_map = nn.Sequential(
                     nn.Linear(512, 512),
                     nn.ReLU(),
@@ -727,6 +733,7 @@ class TransModel(nn.Module):
     def forward(self, x, text_inputs):
         
         with torch.no_grad():
+            # embed shape : [batch_size, 512]
             text_embedding = self.clip_model.encode_text(text_inputs).detach()
         text_embedding = self.text_map(text_embedding)
         text_embedding = text_embedding + self.text_map(text_embedding)

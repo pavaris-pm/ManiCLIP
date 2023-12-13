@@ -32,6 +32,7 @@ if __name__ == "__main__":
     model.eval()
 
     input_text = [args.text] * args.gen_num
+    # this will be used to tokenized text
     clip_text = clip.tokenize(input_text).cuda()
 
     truncation = 0.7
@@ -50,7 +51,7 @@ if __name__ == "__main__":
         styles = generator.style(code)
         input_im, _ = generator([styles], input_is_latent=True, randomize_noise=False, 
                         truncation=truncation, truncation_latent=mean_latent)
-
+        # refer to the model at train.py
         offset = model(styles, clip_text)
 
         new_styles = styles.unsqueeze(1).repeat(1, 14, 1) + offset
