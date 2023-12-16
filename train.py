@@ -142,7 +142,8 @@ def main_worker(gpu, args):
 
     if args.gpu is not None:
         print("Use GPU: {} for training".format(args.gpu))
-    
+
+    # clip model better to be specified here, it will be passed as an argument, architecture could be change
     args.clip_model, _ = clip.load("ViT-B/32", device="cuda")
     clip_loss = CLIPLoss(args.clip_model)
     args.id_loss = IDLoss().cuda().eval()
@@ -656,7 +657,7 @@ class PartTextDataset(data.Dataset):
             sampled_text = 'he has ' + concat_text
         else:
             sampled_text = 'the person has ' + concat_text
-
+        # the clip architecture must be adjusted here as well
         clip_text = clip.tokenize(sampled_text)
         exist_mask = torch.zeros(40)
         exist_mask[selected_cate_40] = 1
@@ -703,7 +704,9 @@ class TransModel(nn.Module):
                 activation: str = "relu", dropout: float = 0.2,
                 num_decoder_layers: int = 4,):
         super(TransModel, self).__init__()
-        
+
+        # load the clip components for handling with input (architecture can be cchanged, \
+                  # note that we must adapt the way they handle with the input as well)
         self.clip_model, self.preprocess = clip.load("ViT-B/32", device="cuda")
         self.transform = transforms.Compose([transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))])
         self.face_pool = nn.AdaptiveAvgPool2d((224, 224))
@@ -727,6 +730,7 @@ class TransModel(nn.Module):
     def forward(self, x, text_inputs):
         
         with torch.no_grad():
+            # encode text into compatible shape : [1, 512] for ViT-B-32, the change can be made according to architecture as well
             text_embedding = self.clip_model.encode_text(text_inputs).detach()
         text_embedding = self.text_map(text_embedding)
         text_embedding = text_embedding + self.text_map(text_embedding)
