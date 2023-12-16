@@ -1,4 +1,4 @@
-# ManiCLIP 
+# ManiCLIP (Colab-Compatible version)
 - This is a colab compatible version, you can directly check on `maniclip_pipeline.ipynb` (open in colab function supported, no need to load it)
 
 ## Official PyTorch implementation
