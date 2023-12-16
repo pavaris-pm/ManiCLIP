@@ -25,17 +25,22 @@ if __name__ == "__main__":
     generator.load_state_dict(torch.load(ckpt)['g_ema'], strict=False)
     generator.eval()
 
+    # the main architecture are located on the train.py
     model = TransModel(nhead=8, num_decoder_layers=6).cuda()
     state_dict = torch.load(args.model_path)
     model.load_state_dict(state_dict['state_dict'])
     model.clip_model = model.clip_model.float()
     model.eval()
 
+    # text input encoding in order to handle with the prompt
+    # note here that some architectural changes can be adjusted via TransModel class
     input_text = [args.text] * args.gen_num
-    clip_text = clip.tokenize(input_text).cuda()
+    clip_text = clip.tokenize(input_text).cuda() # text tokenized by clip text encoder (processor seems not be used here)
 
     truncation = 0.7
     truncation_mean = 4096
+
+    # output will be saved here
     save_path = 'generation'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
@@ -46,13 +51,14 @@ if __name__ == "__main__":
     code = torch.load('data/test_latents_seed100.pt')
     selected_idx = torch.randperm(len(code))[:args.gen_num]
     code = code[selected_idx].cuda()
+    # this is a forward pass for image generation based on prompt
     with torch.no_grad():
         styles = generator.style(code)
         input_im, _ = generator([styles], input_is_latent=True, randomize_noise=False, 
                         truncation=truncation, truncation_latent=mean_latent)
-
+        
         offset = model(styles, clip_text)
-
+        # output offset from the model will set what happens to an image
         new_styles = styles.unsqueeze(1).repeat(1, 14, 1) + offset
         gen_im, _ = generator([new_styles], input_is_latent=True, randomize_noise=False, 
                         truncation=truncation, truncation_latent=mean_latent)
