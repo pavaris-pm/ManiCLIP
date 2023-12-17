@@ -112,7 +112,8 @@ class CLIPLoss(nn.Module):
 def init_parsing_model(args):
     from external.parsing import BiSeNet
     args.parse_model = BiSeNet(n_classes=19)
-    args.parse_model.load_state_dict(torch.load('external/parsing/models/bisenet.pth'))
+    # fix the main path so that the model weight can be accessed via colab environment
+    args.parse_model.load_state_dict(torch.load('/content/ManiCLIP/external/parsing/models/bisenet.pth'))
 
     args.parse_model = args.parse_model.cuda()
     args.parse_model.eval()
